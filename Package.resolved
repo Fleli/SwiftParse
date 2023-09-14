@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "swiftslr",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Fleli/SwiftSLR",
+      "state" : {
+        "branch" : "main",
+        "revision" : "4fc92e785dfac27e01d7051a049170c104941ca2"
+      }
+    }
+  ],
+  "version" : 2
+}
