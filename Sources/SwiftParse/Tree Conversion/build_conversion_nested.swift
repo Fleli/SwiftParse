@@ -14,21 +14,16 @@ extension Generator {
             
             var declarations: [String] = []         // Hele declaration (Swift-statement)
             
-            for (index, rhsComponent) in production.enumerated() {
+            for (index, rhsItem) in production.enumerated() {
                 
-                switch rhsComponent {
-                case .item(let rhsItem):
-                    switch rhsItem {
-                    case .terminal(let type):
-                        ifStatement += child(index, is: type)
-                    case .nonTerminal(let name):
-                        ifStatement += child(index, is: name)
-                    }
-                case .list(let repeating, _):
-                    ifStatement += child(index, is: repeating.swiftSLRToken + "LIST")
+                switch rhsItem {
+                case .terminal(let type):
+                    ifStatement += child(index, is: type)
+                case .nonTerminal(let name):
+                    ifStatement += child(index, is: name)
                 }
                 
-                declarations.append(declaration(index, rhsComponent))
+                declarations.append(declaration(index, rhsItem))
                 
             }
             

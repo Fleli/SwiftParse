@@ -39,22 +39,6 @@ enum StatementType: CustomStringConvertible {
     
 }
 
-enum RhsComponent: CustomStringConvertible {
-    
-    case item(RhsItem)
-    case list(repeating: RhsItem, separator: RhsItem?)
-    
-    var description: String {
-        switch self {
-        case .item(let rhsItem):
-            return rhsItem.description
-        case .list(let repeating, let separator):
-            return "[ \(repeating.description) | \(String(describing: separator?.description)) ]"
-        }
-    }
-    
-}
-
 enum RhsItem: CustomStringConvertible, Hashable {
     
     case terminal(type: String)
@@ -104,7 +88,7 @@ enum RhsItem: CustomStringConvertible, Hashable {
 struct NestItem: CustomStringConvertible {
     
     let caseName: String
-    let production: [RhsComponent]
+    let production: [RhsItem]
     
     var description: String { caseName + " -> " + production.description }
     

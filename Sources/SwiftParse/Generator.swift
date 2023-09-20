@@ -12,10 +12,22 @@ class Generator {
         
         let repeatingItem: RhsItem
         let separator: RhsItem?
+        let nonTerminal: String
+        
+        func asSwiftSLR() -> String {
+            
+            var string = "\(nonTerminal) -> \(nonTerminal) \(separator == nil ? "" : separator!.swiftSLRToken + " ")\(repeatingItem.swiftSLRToken)\n"
+            string += "\(nonTerminal) -> \(repeatingItem.swiftSLRToken)\n"
+            string += "\(nonTerminal) ->\n"
+            
+            return string
+            
+        }
         
         func hash(into hasher: inout Hasher) {
             hasher.combine(repeatingItem)
             hasher.combine(separator)
+            hasher.combine(nonTerminal)
         }
         
     }
@@ -43,6 +55,7 @@ class Generator {
             let nodeName = list.repeatingItem.swiftSLRNodeName
             let separator = (list.separator?.swiftSLRToken ?? "") + " "
             converters += generateListConverter(nodeName, separator)
+            swiftSLRSpecificationFile.append(list.asSwiftSLR())
         }
         
         for statement in statements.statements {
@@ -54,6 +67,9 @@ class Generator {
         
         writeToFile(content: types, at: path + "/" + "Types.swift")
         writeToFile(content: converters, at: path + "/" + "Converters.swift")
+        
+        print("SwiftSLR Spec file:")
+        print(swiftSLRSpecificationFile)
         
         try SwiftSLR.generate(from: swiftSLRSpecificationFile, includingToken: false, location: path, parseFile: "Parser", visibility: "public")
         
@@ -103,8 +119,8 @@ class Generator {
             """
     }
     
-    func insertList(of repeating: RhsItem, with separator: RhsItem?) {
-        lists.insert(.init(repeatingItem: repeating, separator: separator))
+    func insertList(of repeating: RhsItem, with separator: RhsItem?, named nonTerminal: String) {
+        lists.insert(.init(repeatingItem: repeating, separator: separator, nonTerminal: nonTerminal))
     }
     
     func writeToFile(content: String, at path: String) {

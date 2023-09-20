@@ -30,20 +30,15 @@ extension Generator {
         return " && children.count == \(count)"
     }
     
-    func declaration(_ index: Int, _ component: RhsComponent) -> String {
+    func declaration(_ index: Int, _ item: RhsItem) -> String {
         
         let prefix = "let arg\(index) = children[\(index)]."
         
-        switch component {
-        case .item(let rhsItem):
-            switch rhsItem {
-            case .terminal(_):
-                return prefix + convertToTerminalCall
-            case .nonTerminal(let name):
-                return prefix + callSyntax(for: name)
-            }
-        case .list(let repeating, _):
-            return prefix + callSyntax(for: repeating.swiftSLRToken + "LIST")
+        switch item {
+        case .terminal(_):
+            return prefix + convertToTerminalCall
+        case .nonTerminal(let name):
+            return prefix + callSyntax(for: name)
         }
         
     }

@@ -51,32 +51,21 @@ extension Generator {
         
     }
     
-    private func associatedValue(of rhsComponent: RhsComponent, with usedLabels: inout [String : Int]) -> AssociatedValue {
+    private func associatedValue(of item: RhsItem, with usedLabels: inout [String : Int]) -> AssociatedValue {
         
         let associatedValueLabel: String
         let associatedValueType: String
         let associatedValueDescriptor: String
         
-        switch rhsComponent {
-        case .item(let rhsItem):
-            
-            switch rhsItem {
-            case .terminal(let type):
-                associatedValueLabel = getLabel(&usedLabels, type)
-                associatedValueType = "String"
-                associatedValueDescriptor = associatedValueLabel
-            case .nonTerminal(let name):
-                associatedValueLabel = getLabel(&usedLabels, name.camelCased.nonColliding)
-                associatedValueType = name.nonColliding
-                associatedValueDescriptor = associatedValueLabel + ".description"
-            }
-            
-        case .list(let repeating, _):
-            
-            associatedValueLabel = getLabel(&usedLabels, repeating.swiftSLRToken.camelCased.nonColliding) + "s"
-            associatedValueType = "[" + repeating.swiftSLRToken.nonColliding + "]"
+        switch item {
+        case .terminal(let type):
+            associatedValueLabel = getLabel(&usedLabels, type)
+            associatedValueType = "String"
+            associatedValueDescriptor = associatedValueLabel
+        case .nonTerminal(let name):
+            associatedValueLabel = getLabel(&usedLabels, name.camelCased.nonColliding)
+            associatedValueType = name.nonColliding
             associatedValueDescriptor = associatedValueLabel + ".description"
-            
         }
         
         return (associatedValueLabel, associatedValueType, associatedValueDescriptor)

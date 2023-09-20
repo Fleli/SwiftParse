@@ -33,29 +33,14 @@ extension StatementType {
     private static func nestedCasesToString(_ cases: [NestItem], _ lhs: String) throws -> String {
         
         var string = ""
-        var lists = ""
         
         for nestItem in cases {
             
             string += lhs + " -> "
             
-            for rhsComponent in nestItem.production {
+            for rhsItem in nestItem.production {
                 
-                if case .list(let repeating, let separator) = rhsComponent {
-                    
-                    let listName = repeating.swiftSLRToken + "LIST"
-                    
-                    string += listName + " "
-                    
-                    lists += "\(listName) -> \(listName) \(separator == nil ? "" : separator!.swiftSLRToken + " ")\(repeating.swiftSLRToken)\n"
-                    lists += "\(listName) -> \(repeating.swiftSLRToken)\n"
-                    lists += "\(listName) ->\n"
-                    
-                } else if case .item(let rhsItem) = rhsComponent {
-                    
-                    string += rhsItem.swiftSLRToken + " "
-                    
-                }
+                string += rhsItem.swiftSLRToken + " "
                 
             }
             
@@ -63,7 +48,7 @@ extension StatementType {
             
         }
         
-        return string + lists
+        return string
         
     }
     

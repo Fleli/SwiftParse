@@ -35,6 +35,8 @@ class LLParser {
                 try parsePrecedence()
             case "class":
                 try parseClass()
+            case "list":
+                try parseList()
             default:
                 throw ParseError.unexpected(found: tokens[index].content, expected: "some Statement", location: index)
             }
@@ -249,7 +251,7 @@ class LLParser {
         
     }
     
-    
+    @discardableResult
     private func nextToken(as type: String) throws -> Token {
         
         guard notExhausted else {
@@ -267,49 +269,10 @@ class LLParser {
     }
     
     
-    private func collectItemsUntil(among endSymbols: String ...) throws -> [RhsComponent] {
+    private func collectItemsUntil(among endSymbols: String ...) throws -> [RhsItem] {
         
         var allowed = false
-        var collected: [RhsComponent] = []
-        
-        func parseList() throws -> RhsComponent {
-            
-            index += 1
-            
-            guard notExhausted else {
-                throw ParseError.exhausted(expected: "list description")
-            }
-            
-            guard let rhsItem = RhsItem(from: tokens[index]) else {
-                throw ParseError.unexpected(found: tokens[index].content, expected: "some RhsItem", location: index)
-            }
-            
-            index += 1
-            
-            guard notExhausted else {
-                throw ParseError.exhausted(expected: "list terminator or separator")
-            }
-            
-            if tokens[index].type == "]" {
-                generator.insertList(of: rhsItem, with: nil)
-                return .list(repeating: rhsItem, separator: nil)
-            }
-            
-            guard index <= tokens.count - 2,
-                  tokens[index].type == "|",
-                  tokens[index + 1].type == "terminal",
-                  tokens[index + 2].type == "]" else {
-                throw ParseError.incomplete(expectedPattern: "| separator ]")
-            }
-            
-            let separator = tokens[index + 1].content
-            
-            index += 2
-            
-            generator.insertList(of: rhsItem, with: .terminal(type: separator))
-            return .list(repeating: rhsItem, separator: .terminal(type: separator))
-            
-        }
+        var collected: [RhsItem] = []
         
         while notExhausted {
             
@@ -321,9 +284,7 @@ class LLParser {
             }
             
             if let item = RhsItem(from: nextToken) {
-                collected.append(.item(item))
-            } else if nextToken.type == "[" {
-                try collected.append(parseList())
+                collected.append(item)
             } else {
                 throw ParseError.unexpected(found: nextToken.content, expected: "some RhsItem ...", location: index)
             }
@@ -394,6 +355,61 @@ class LLParser {
         return classItems
         
     }
+    
+    
+    private func parseList() throws {
+        
+        index += 1
+        
+        guard notExhausted else {
+            throw ParseError.exhausted(expected: "list name")
+        }
+        
+        let nonTerminal = try nextToken(as: "nonTerminal").content
+        
+        print("Non terminal:", nonTerminal)
+        
+        try nextToken(as: "[")
+        
+        print("[")
+        
+        guard let rhsItem = RhsItem(from: tokens[index]) else {
+            throw ParseError.unexpected(found: tokens[index].content, expected: "some RhsItem", location: index)
+        }
+        
+        print("RhsItem:", rhsItem)
+        
+        index += 1
+        
+        guard notExhausted else {
+            throw ParseError.exhausted(expected: "list terminator or separator")
+        }
+        
+        if tokens[index].type == "]" {
+            index += 1
+            generator.insertList(of: rhsItem, with: nil, named: nonTerminal)
+            return
+        }
+        
+        guard index <= tokens.count - 2,
+              tokens[index].type == "|",
+              tokens[index + 1].type == "terminal",
+              tokens[index + 2].type == "]" else {
+            throw ParseError.incomplete(expectedPattern: "| separator ]")
+        }
+        
+        index += 1
+        
+        let separator = tokens[index].content
+        
+        index += 1
+        
+        try nextToken(as: "]")
+        
+        generator.insertList(of: rhsItem, with: .terminal(type: separator), named: nonTerminal)
+        
+    }
+    
     
     private func parseMain() throws -> RhsItem {
         
