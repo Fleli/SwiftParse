@@ -52,10 +52,12 @@ class Generator {
         var converters = ""
         
         for list in lists {
-            let nodeName = list.repeatingItem.swiftSLRNodeName
+            let repeating = list.repeatingItem.swiftSLRNodeName.nonColliding
+            let nodeName = list.nonTerminal.nonColliding
             let separator = (list.separator?.swiftSLRToken ?? "") + " "
-            converters += generateListConverter(nodeName, separator)
+            converters += generateListConverter(repeating, nodeName, separator)
             swiftSLRSpecificationFile.append(list.asSwiftSLR())
+            types += "\(desiredVisibility) typealias \(nodeName.CamelCased.nonColliding) = [\(repeating)]\n\n"
         }
         
         for statement in statements.statements {
@@ -88,26 +90,26 @@ class Generator {
         
     }
     
-    private func generateListConverter(_ nodeName: String, _ separator: String) -> String {
+    private func generateListConverter(_ elementName: String, _ nodeName: String, _ separator: String) -> String {
         return """
             \(desiredVisibility) extension SLRNode {
                 
-                func convertTo\(nodeName.CamelCased)LIST() -> [\(nodeName.nonColliding)] {
+                func convertTo\(nodeName.CamelCased)() -> \(nodeName.nonColliding) {
                     
                     if children.count == 0 {
                         return []
                     }
                     
                     if children.count == 1 {
-                        return [children[0].convertTo\(nodeName.CamelCased)()]
+                        return [children[0].convertTo\(elementName)()]
                     }
                     
                     if children.count == 2 {
-                        return children[0].convertTo\(nodeName.CamelCased)LIST() + [children[1].convertTo\(nodeName.CamelCased)()]
+                        return children[0].convertTo\(nodeName.CamelCased)() + [children[1].convertTo\(elementName)()]
                     }
                     
                     if children.count == 3 {
-                        return children[0].convertTo\(nodeName.CamelCased)LIST() + [children[2].convertTo\(nodeName.CamelCased)()]
+                        return children[0].convertTo\(nodeName.CamelCased)() + [children[2].convertTo\(elementName)()]
                     }
                     
                     fatalError()
