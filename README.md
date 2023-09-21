@@ -16,11 +16,12 @@ A SwiftParse specification `String` starts with an `@main` statement, starting w
 @main Main
 ```
 
-Then comes the actual (abstracted) grammar. SwiftParse offers four types of statements:
+Then comes the actual (abstracted) grammar. SwiftParse offers five types of statements:
 - `enum` statements, for simple groups of related but distinct options
 - `nested` statements, for extended `enum`s that allow indirection, multiple terminals and non-terminals per case, and lists.
 - `precedence` statements, that offer a maintainable, readable and clean syntax for deeply dependent (and recursive) productions
 - `class` statements, for types that follow a specific pattern, with some optional and some required parts
+- `list` statements, for defining non-terminals that represent Swift arrays
 
 Note: The non-terminal `SwiftSLRMain` is reserved by SwiftParse and should never be used. 
 
@@ -63,10 +64,9 @@ public enum DeclarationKeyword: CustomStringConvertible {
 `nested` behaves a bit differently than `enum`s, and allows more flexibility:
 - Whereas `enum`s accept exactly one item (terminal or non-terminal) per case, `nested` statements allow an arbitrary number of items (separated by whitespace)
 - A `nested` statement requires the `case` keyword to be followed by the actual name of the case, before items can be listed
-- `nested` statements accept not only terminals and non-terminals, but also _lists_ (see below)
 
 An example of usage of `nested` statements are for variable/object references that might be
-- an variable (base case)
+- a variable (base case)
 - a member of a reference (recursive)
 - calling a reference (recursive)
 - subscripting a reference (recursive)
@@ -76,11 +76,11 @@ The SwiftParse syntax to express this, would be the following:
 nested Reference {
     case variable #identifier
     case member Reference #. #identifier
-    case call Reference #( [ Argument | #, ] #)
+    case call Reference #( Arguments #)
     case subscript Reference #[ Expression #]
 }
 ```
-Here, we make use of the list construct in case `call`: A `Reference.call` is a `(` followed by a list of `Argument` separated by the terminal `,`, and then lastly a `)`.
+Here, we make use of the list construct in case `call`: A `Reference.call` is a `(` followed by the `Arguments` non-terminal, and then lastly a `)`.
 
 The resulting Swift type for `Reference` is generated automatically and can be found in `Types.swift`:
 ```
@@ -88,7 +88,7 @@ public indirect enum Reference: CustomStringConvertible {
     
     case variable(_ identifier: String)
     case member(_ reference: Reference, _ _terminal: String, _ identifier: String)
-    case call(_ reference: Reference, _ _terminal: String, _ arguments: [Argument], _ _terminal1: String)
+    case call(_ reference: Reference, _ _terminal: String, _ arguments: Arguments, _ _terminal1: String)
     case `subscript`(_ reference: Reference, _ _terminal: String, _ expression: Expression, _ _terminal1: String)
     
     public var description: String {
@@ -236,6 +236,10 @@ public class Declaration: CustomStringConvertible {
 ```
 
 Here, we see that when `var` appears in the SwiftParse specification, that variable is stored in the resulting `Declaration` object. Also, the class includes four initializers since there are `2 * 2 = 4` (both the type and value are optional) ways to parse a `Declaration`. Note however that the user does not need to understand the initialization system since SwiftParse automatically handles tree conversion.
+
+### The `list` statement
+
+
 
 ## Inner workings
 
