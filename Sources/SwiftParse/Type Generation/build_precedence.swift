@@ -1,6 +1,6 @@
 extension Generator {
     
-    func build_precedence(_ lhs: String, _ groups: [PrecedenceGroup]) throws -> String {
+    func build_precedence(_ lhs: String, _ groups: [PrecedenceGroup]) throws -> (content: String, fileName: String) {
         
         typealias Operators = [RhsItem]
         
@@ -69,7 +69,7 @@ extension Generator {
         
         string += "\n}\n"
         
-        return string
+        return (string, lhs.CamelCased)
         
     }
     

@@ -1,6 +1,6 @@
 extension Generator {
     
-    func build_enum(_ lhs: String, _ cases: [RhsItem]) throws -> String {
+    func build_enum(_ lhs: String, _ cases: [RhsItem]) throws -> (content: String, fileName: String) {
         
         var string = "\(desiredVisibility) enum \(lhs.nonColliding): CustomStringConvertible {" + lt + lt
         
@@ -31,7 +31,7 @@ extension Generator {
         
         string += descriptionGetter + "}" + lt + "}" + lt + "\n}\n"
         
-        return string
+        return (string, lhs.CamelCased)
         
     }
     

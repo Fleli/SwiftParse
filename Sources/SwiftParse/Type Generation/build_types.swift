@@ -4,7 +4,7 @@ extension Generator {
     var ltt: String { lt + "\t" }
     var lttt: String { ltt + "\t" }
     
-    func build_type(for statement: Statement) throws -> String {
+    func build_type(for statement: Statement) throws -> (content: String, fileName: String) {
         
         let lhs = statement.lhs
         let type = statement.rhs

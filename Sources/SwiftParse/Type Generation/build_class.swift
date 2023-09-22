@@ -58,7 +58,7 @@ extension Generator {
         
     }
     
-    func build_class(_ lhs: String, _ elements: [ClassElement], _ allProductions: [[ClassItem]]) throws -> String {
+    func build_class(_ lhs: String, _ elements: [ClassElement], _ allProductions: [[ClassItem]]) throws -> (content: String, fileName: String) {
         
         var string = "\(desiredVisibility) class \(lhs.nonColliding): CustomStringConvertible {" + lt + "\n"
         
@@ -77,7 +77,7 @@ extension Generator {
         
         string += "\(descriptionGetter)\n}\n"
         
-        return string
+        return (string, lhs.CamelCased)
         
     }
     

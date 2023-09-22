@@ -2,7 +2,7 @@ extension Generator {
     
     private typealias AssociatedValue = (label: String, type: String, descriptor: String)
     
-    func build_nested(_ lhs: String, _ cases: [NestItem]) throws -> String {
+    func build_nested(_ lhs: String, _ cases: [NestItem]) throws -> (content: String, fileName: String) {
         
         var string = "\(desiredVisibility) indirect enum \(lhs.nonColliding): CustomStringConvertible {" + lt + lt
         var descriptor = "\(desiredVisibility) var description: String {" + ltt + "switch self {" + ltt
@@ -13,7 +13,7 @@ extension Generator {
         
         string += lt + descriptor + "}\(lt)}\(lt)\n}\n"
         
-        return string
+        return (string, lhs.CamelCased)
         
     }
     
