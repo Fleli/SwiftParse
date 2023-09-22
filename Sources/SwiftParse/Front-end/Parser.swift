@@ -367,17 +367,11 @@ class LLParser {
         
         let nonTerminal = try nextToken(as: "nonTerminal").content
         
-        print("Non terminal:", nonTerminal)
-        
         try nextToken(as: "[")
-        
-        print("[")
         
         guard let rhsItem = RhsItem(from: tokens[index]) else {
             throw ParseError.unexpected(found: tokens[index].content, expected: "some RhsItem", location: index)
         }
-        
-        print("RhsItem:", rhsItem)
         
         index += 1
         

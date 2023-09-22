@@ -34,7 +34,7 @@ class Generator {
     
     private var lists: Set<List> = []
     
-    func createParser(from specification: String, at path: String, visibility: String = "public", spreadTypesAcrossMultipleFiles: Bool) throws {
+    func createParser(from specification: String, at path: String, visibility: String = "public", typePath: String?) throws {
         
         self.desiredVisibility = visibility
         
@@ -47,6 +47,8 @@ class Generator {
         for statement in statements.statements {
             try swiftSLRSpecificationFile.append(statement.asSwiftSLR())
         }
+        
+        let spreadTypesAcrossMultipleFiles = (typePath != nil)
         
         func typeFilePreamble(_ fileName: String) -> String {
             """
@@ -96,7 +98,7 @@ class Generator {
         converters += build_convertToTerminal()
         
         for type in types {
-            writeToFile(content: type.content, at: path + "/" + type.fileName)
+            writeToFile(content: type.content, at: typePath ?? path + "/" + type.fileName)
         }
         
         writeToFile(content: converters, at: path + "/Converters.swift")

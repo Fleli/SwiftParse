@@ -6,30 +6,34 @@ SwiftParse is a Simple LR (SLR) parser generator. Both SwiftParse and the result
 
 ## How do I use SwiftParse?
 
-SwiftParse is not organized as a package (though this might change later). Instead, you use its `main.swift` file to tell SwiftParse what should be generated. The `createParser` function of `generator` takes in a `specification` (`String`) and a `path` (`String`). When you run the program, it will (if the specification does not contain errors) generate three files: `Types.swift`, `Converters.swift` and `Parser.swift`. The latter comes from SwiftSLR.
+SwiftParse is a parser generator package. To use SwiftParse, include this package as a dependancy in your project and write `import SwiftParse` in all files that use it.
+
+SwiftParse defines a single API: The `SwiftParse.generateFiles(specification:path:visibility:typePath:)` function. It takes four arguments:
+- First, it takes a `String` named `specification`. This is used by SwiftParse to interpret and generate both the necessary Swift types and formal grammar that represents what the user wrote.
+- Then comes a `String` named `path`. SwiftParse uses this to place the generated files in the correct directory. The `path` may _not_ end with a `/` since SwiftParse will insert this.
+- Third, the `SwiftVisibility` parameter named `visibility` takes either a `public`, `open` or `internal` case. This controls the visibility (access control) of the resulting files.
+- Finally, the `FileOption` parameter `typeFileOption` describes whether to generate a single type file (`.singleTypeFile`), or to spread the types across multiple files (`.spreadAcrossMultipleFiles(path: String)`). For the latter case, a `path: String` must be specified. All the generated type files will be put in the directory specified there. This path should _not_ end with a `/` since SwiftParse inserts this.
 
 ## The SwiftParse specification format
 
-A SwiftParse specification `String` starts with an `@main` statement, starting with the `@main` reserved keyword followed by a non-terminal. This is used to tell the parser what production is final and accepting. An `@main` statement might look like this:
+A SwiftParse specification `String` starts with an `main` statement. This statement starts with the `@main` keyword followed by a non-terminal. This is used to tell the parser what production is final and accepting. An `@main` statement might look like this (the non-terminal after `@main` can be anything, except the reserved `SwiftSLRMain` non-terminal):
 
 ```
 @main Main
 ```
 
-Then comes the actual (abstracted) grammar. SwiftParse offers five types of statements:
+Then comes the actual specification. SwiftParse offers five types of statements:
 - `enum` statements, for simple groups of related but distinct options
-- `nested` statements, for extended `enum`s that allow indirection, multiple terminals and non-terminals per case, and lists.
+- `nested` statements, for extended `enum`s that allow indirection and multiple items per case.
 - `precedence` statements, that offer a maintainable, readable and clean syntax for deeply dependent (and recursive) productions
 - `class` statements, for types that follow a specific pattern, with some optional and some required parts
 - `list` statements, for defining non-terminals that represent Swift arrays
 
-Note: The non-terminal `SwiftSLRMain` is reserved by SwiftParse and should never be used. 
-
 ### The `enum` statement
 
-`enum` statements are the simplest of the four. If declarations can start either with the `var` or `let` keywords, an `enum` is perfect:
+`enum` statements are the simplest of the four. To illustrate the use of an enum, say we model Swift's declaration syntax. A declaration may start with the `let` or the `var` keyword.
 
-The SwiftParse syntax for that `enum` would look the following:
+The SwiftParse syntax for this `enum` would look the following:
 ```
 enum DeclarationPrefix {
     case #let
@@ -42,7 +46,7 @@ When SwiftParse sees this statement, it will
 - create a `DeclarationPrefix` type (including `CustomStringConvertible` conformance) in the resulting Swift files so that it can be further used
 - generate converter functions so that the raw `SLRNode` tree from SwiftSLR's parser can be converted to user-defined types
 
-The `DeclarationPrefix` type in the resulting `Types.swift` file will look like this:
+The `DeclarationPrefix` type in the resulting type file will look like this:
 ```
 public enum DeclarationKeyword: CustomStringConvertible {
     
@@ -65,11 +69,11 @@ public enum DeclarationKeyword: CustomStringConvertible {
 - Whereas `enum`s accept exactly one item (terminal or non-terminal) per case, `nested` statements allow an arbitrary number of items (separated by whitespace)
 - A `nested` statement requires the `case` keyword to be followed by the actual name of the case, before items can be listed
 
-An example of usage of `nested` statements are for variable/object references that might be
-- a variable (base case)
-- a member of a reference (recursive)
-- calling a reference (recursive)
-- subscripting a reference (recursive)
+Consider, as an example, defining a `Reference` as follows:
+- a variable
+- a member of a reference, accessed with the dot (`.`) syntax
+- calling a reference (An arbitrary number of arguments inside the parentheses)
+- subscripting a reference (with `[]`)
 
 The SwiftParse syntax to express this, would be the following:
 ```
@@ -80,9 +84,9 @@ nested Reference {
     case subscript Reference #[ Expression #]
 }
 ```
-Here, we make use of the list construct in case `call`: A `Reference.call` is a `(` followed by the `Arguments` non-terminal, and then lastly a `)`.
 
-The resulting Swift type for `Reference` is generated automatically and can be found in `Types.swift`:
+The resulting Swift type for `Reference` is generated automatically:
+
 ```
 public indirect enum Reference: CustomStringConvertible {
     
@@ -105,7 +109,7 @@ public indirect enum Reference: CustomStringConvertible {
 
 ### The `precedence` statement
 
-A subset of the grammar of many programming languages look similar to this:
+A subset of the grammar of many programming languages looks similar to this:
 
 ```
 Sum -> Sum #+ Product
@@ -113,6 +117,7 @@ Sum -> Sum #- Product
 Sum -> Product
 Product -> Product #* Factor
 Product -> Product #/ Factor
+Product -> Product #% Factor
 Product -> Factor
 Factor -> #- Base
 Factor -> Base
@@ -131,13 +136,13 @@ precedence Expression {
 }
 ```
 
-First, all operators are listed (in order). The first `#+` and `#-` both belong to the first `infix`, telling SwiftParse that they have the same precedence and are infix operators. Similarly, `#*`, `#/` and `#%` all belong to the second `infix` (implying higher precedence than for binary `+` and `-`), while the last `#-` belongs to the `prefix` keyword, implying even higher precedence. The `postfix` keyword is also available.
+First, all operators are listed (in order). The first `#+` and `#-` both belong to the first `infix`, telling SwiftParse that they have the same precedence and are infix operators. Similarly, `#*`, `#/` and `#%` all belong to the second `infix` (implying higher precedence than for binary `+` and `-`), while the last `#-` belongs to the `prefix` keyword, implying even higher precedence. Note that `postfix` operators are also available.
 
 The lines starting with `infix` and `prefix` (and `postfix` if one is present) represent the `Sum`, `Product` and `Factor` non-terminals above (though they are automatically named very differently internally).
 
 The last two lines, starting with `:`, represents _the root_ of the `precedence` construct. Each root line may have an arbitrary number of items (terminals or non-terminals) and can be recursive. They correspond to the `Base` non-terminal's productions above.
 
-SwiftParse will generate the following `Expression` type in `Types.swift` from this `precedence` statement:
+SwiftParse will generate the following `Expression` type from this `precedence` statement:
 ```
 public indirect enum Expression: CustomStringConvertible {
     
@@ -174,7 +179,7 @@ public indirect enum Expression: CustomStringConvertible {
 
 ### The `class` statement
 
-Finally, `class` statements are used whenever several optional and required items should be grouped together to form one non-terminal. In a programming language, this will usually be a good fit for the different statement types. Each line in a `class` statement starts with either `?` (for optional items) or `!` (for required items). An arbitrary number of items can be written per line. Different lines are independent, but if two items are on the same (optional) line, either zero or both must be matched. For instance, the parser will match `let a` and `let a: Int`, but not `let a:` if a Swift-like declaration is defined as follows:
+`class` statements are used whenever several optional and required items should be grouped together to form one non-terminal. In a programming language, this will usually be a good fit for the different statement types. Each line in a `class` statement starts with either `?` (for optional items) or `!` (for required items). An arbitrary number of items can be written per line. Different lines are independent, but if two items are on the same (optional) line, either zero or both must be matched. For instance, the parser will match `let a` and `let a: Int`, but not `let a:` if a Swift-like declaration is defined as follows:
 
 ```
 class Declaration {
@@ -191,7 +196,7 @@ Here, we define a `Declaration` as
 3. Optionally including the `: Type` syntax, storing whatever type is found when parsing in a `type` variable
 4. Optionally including the `= Expression` syntax, storing whatever expression is found when parsing in a `value` variable
 
-The resulting `Declaration` in `Types.swift` looks like this:
+The generated `Declaration` type looks like this:
 ```
 public class Declaration: CustomStringConvertible {
     
@@ -239,18 +244,26 @@ Here, we see that when `var` appears in the SwiftParse specification, that varia
 
 ### The `list` statement
 
+Finally, the `list` statement allows users to work with non-terminals that are converted to Swift array types. To define a list, use the `list` keyword followed by the list's name, for instance `StatementList`. Then use _list syntax_ to tell SwiftParse how this list is defined.
 
+The list syntax starts with a `[`. Then, SwiftParse expects a single item (terminal or non-terminal). The user may then end the list definition with a `]`, or define a _separator_ by inserting a `|` followed by a terminal that separates each item, and _then_ a `]` to close the list definition.
+
+For example, `list StatementList [ Statement ]` defines a list of `Statement` non-terminals that directly follow each other. `list Parameters [ Parameter | #, ]` on the other hand, defines `Parameters` as being a list of `Parameter` non-terminals separated by the `,` terminal. SwiftParse expects the terminator _between_ each element of the list, never before or after.
+
+The latter example will produce the following Swift code in the resulting type file:
+```
+typealias Parameters = [Parameter]
+```
 
 ## Inner workings
 
 SwiftParse is divided into 6 steps.
 
-Steps 1 and 2 represent the front-end of SwiftParse. Step 1 uses a [SwiftLex](https://github.com/Fleli/SwiftLex)-generated lexer, and a handwritten LL(1) parser to make sense of the user's specification.
+Steps 1 and 2 represent the front-end of SwiftParse. Step 1 uses a [SwiftLex](https://github.com/Fleli/SwiftLex)-generated lexer. Step 2 uses a handwritten LL(1) parser to make sense of the user's specification.
 
 Step 3 uses the result of the front-end to generate a SwiftSLR grammar and a `Set` of `List` instances that are used in step 4 to complete the SwiftSLR grammar.
 
-Step 5 uses the same `[Statement]` to build two files: The _type_ file (which includes `class` and `enum` definitions that are derived from the user's specification) and the
-_converter_ file that extends the `SLRNode` class with functions that recursively convert the `SLRNode` tree into a tree the types from the type file.
+Step 5 uses the same `[Statement]` to build the resulting files. It always creates a `Converters.swift` file containing Swift code for turning an `SLRNode` tree into a tree of user-defined types. Also, it generates _either_ a `Types.swift` file _or_ one type file for each type that is defined in the specification.
 
 Step 6 uses SwiftSLR to generate the `SLRParser` class. This is responsible for doing the actual parsing when the user passes in a series of `Token`s.
 
@@ -263,12 +276,6 @@ Step 6 uses SwiftSLR to generate the `SLRParser` class. This is responsible for 
 4       | `Set<List>`       | `String`              | Extend the SwiftSLR grammar to include list definitions
 5       | `[Statement]`     | `String`, `String`    | Generate type definitions and `SLRNode` tree converters, write them to files
 6       | `String`          | `String`              | Use SwiftSLR to generate the actual parser and write to a file
-
-## Future Updates
-
-Several updates might come in the future:
-1. The `class` statement will support list definitions instead of having to rely on "filler" `nested` statements that clutter the user experience.
-2. The `enum` type will probably be removed, and then `nested` will be renamed to `enum` since it really provides a superset of `enum`'s functionality. 
 
 ## Commit History
 
