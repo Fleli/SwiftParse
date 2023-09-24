@@ -98,7 +98,8 @@ class Generator {
         converters += build_convertToTerminal()
         
         for type in types {
-            writeToFile(content: type.content, at: typePath ?? path + "/" + type.fileName)
+            print("TypePath ?? path: ", typePath ?? path)
+            writeToFile(content: type.content, at: (typePath ?? path) + "/" + type.fileName)
         }
         
         writeToFile(content: converters, at: path + "/Converters.swift")
@@ -162,6 +163,7 @@ class Generator {
         
         let fileManager = FileManager()
         let didCreate = fileManager.createFile(atPath: path, contents: content.data(using: .utf8))
+        print("Attempted to create with content: \(content), data = \(content.data(using: .utf8))")
         print("didCreate:", didCreate)
         
     }

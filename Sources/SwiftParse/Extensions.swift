@@ -81,13 +81,69 @@ extension String {
         "typealias", "unowned", "var", "weak", "where", "while", "Type", "Self", "assignment"
     ]
     
+    private static let invalidCharacters: [Character: String] = [
+        ",": "comma_",
+        "(": "leftParenthesis_",
+        ")": "rightParenthesis_",
+        "'": "apostrophe_",
+        "!": "exclamationMark_",
+        "@": "atSymbol_",
+        "#": "hashSymbol_",
+        "%": "percentSign_",
+        "*": "asterisk_",
+        "+": "plusSign_",
+        "-": "hyphen_",
+        "/": "slash_",
+        ":": "colon_",
+        ";": "semicolon_",
+        "<": "lessThan_",
+        "=": "equalsSign_",
+        ">": "greaterThan_",
+        "?": "questionMark_",
+        "[": "leftSquareBracket_",
+        "]": "rightSquareBracket_",
+        "{": "leftCurlyBrace_",
+        "}": "rightCurlyBrace_",
+        "|": "verticalBar_",
+        "~": "tilde_",
+        " ": "space_",
+        ".": "period_",
+        "&": "ampersand_",
+        "$": "dollarSign_"
+    ]
+
+
+
+    
     // TODO: Backtick self if Swift keyword
     var nonColliding: String {
+        
         if Self.swiftKeywords.contains(self) {
+            
             return "`\(self)`"
+            
         } else {
-            return self
+            
+            var isIllegal = false
+            
+            let adjusted: String = self.map { (c: Character) -> String in
+                
+                if c.isLetter {
+                    return "\(c)"
+                } else if let coveredCase = Self.invalidCharacters[c] {
+                    isIllegal = true
+                    return coveredCase
+                } else {
+                    isIllegal = true
+                    return "\(c.asciiValue ?? 8)"
+                }
+                
+            }.reduce("_", {$0 + $1})
+            
+            return isIllegal ? adjusted : self
+            
         }
+        
     }
     
     var camelCased: String {

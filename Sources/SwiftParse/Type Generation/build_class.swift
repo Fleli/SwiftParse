@@ -43,8 +43,8 @@ extension Generator {
             let signatureArgumentList = chosenFields.map { "_ " + $0.swiftSignature }.convertToList(", ")
             
             let initLines = allFields
-                .map { (name: $0.name, isNil: !chosenFields.contains($0)) }
-                .map { "\t\tself.\($0.name) = \($0.isNil ? "nil" : $0.name)\n" }
+                .map { (name: $0.name.nonColliding, isNil: !chosenFields.contains($0)) }
+                .map { "\t\tself.\($0.name.nonColliding) = \($0.isNil ? "nil" : $0.name.nonColliding)\n" }
                 .reduce("") { $0 + $1 }
             
             return "\t\n\tinit(\(signatureArgumentList)) {\n\(initLines)\t}\n"

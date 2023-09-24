@@ -9,7 +9,7 @@ extension Generator {
         
         for enumCase in cases {
             
-            let caseName: String
+            var caseName: String
             let suffix: String
             
             switch enumCase {
@@ -21,10 +21,12 @@ extension Generator {
                 suffix = "(" + name.CamelCased.nonColliding + ")"
             }
             
-            string += "case " + caseName.camelCased.nonColliding + suffix + lt
+            let nonCollidingCaseName = caseName.camelCased.nonColliding
+            
+            string += "case " + nonCollidingCaseName + suffix + lt
             let convertedSuffix = String(suffix.dropFirst().dropLast()).camelCased.nonColliding
             
-            descriptionGetter += "case ." + caseName.camelCased.nonColliding + (suffix.count > 0 ? "(let \(convertedSuffix))" : "") + ": return "
+            descriptionGetter += "case ." + nonCollidingCaseName + (suffix.count > 0 ? "(let \(convertedSuffix))" : "") + ": return "
             descriptionGetter += "\(suffix.count > 0 ? convertedSuffix + ".description" : "\"\(caseName)\"")" + ltt
             
         }
