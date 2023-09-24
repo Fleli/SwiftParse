@@ -8,7 +8,7 @@ SwiftParse is a Simple LR (SLR) parser generator. Both SwiftParse and the result
 
 SwiftParse is a parser generator package. To use SwiftParse, include this package as a dependancy in your project and write `import SwiftParse` in all files that use it.
 
-SwiftParse defines a single API: The `SwiftParse.generateFiles(specification:path:visibility:typePath:)` function. It takes four arguments:
+SwiftParse defines a single API: The `SwiftParse.generateFiles(specification:path:visibility:typeFileOption:)` function. It takes four arguments:
 - First, it takes a `String` named `specification`. This is used by SwiftParse to interpret and generate both the necessary Swift types and formal grammar that represents what the user wrote.
 - Then comes a `String` named `path`. SwiftParse uses this to place the generated files in the correct directory. The `path` may _not_ end with a `/` since SwiftParse will insert this.
 - Third, the `SwiftVisibility` parameter named `visibility` takes either a `public`, `open` or `internal` case. This controls the visibility (access control) of the resulting files.
