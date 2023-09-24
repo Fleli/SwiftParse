@@ -31,7 +31,7 @@ Then comes the actual specification. SwiftParse offers five types of statements:
 
 ### The `enum` statement
 
-`enum` statements are the simplest of the four. To illustrate the use of an enum, say we model Swift's declaration syntax. A declaration may start with the `let` or the `var` keyword.
+`enum` statements are the simplest of the five. To illustrate the use of an enum, say we model Swift's declaration syntax. A declaration may start with the `let` or the `var` keyword.
 
 The SwiftParse syntax for this `enum` would look the following:
 ```
