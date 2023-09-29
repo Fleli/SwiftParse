@@ -163,7 +163,6 @@ class Generator {
         
         let fileManager = FileManager()
         let didCreate = fileManager.createFile(atPath: path, contents: content.data(using: .utf8))
-        print("Attempted to create with content: \(content), data = \(content.data(using: .utf8))")
         print("didCreate:", didCreate)
         
     }

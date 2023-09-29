@@ -109,11 +109,9 @@ extension String {
         " ": "space_",
         ".": "period_",
         "&": "ampersand_",
-        "$": "dollarSign_"
+        "$": "dollarSign_",
+        "_": "underscore_"
     ]
-
-
-
     
     // TODO: Backtick self if Swift keyword
     var nonColliding: String {
