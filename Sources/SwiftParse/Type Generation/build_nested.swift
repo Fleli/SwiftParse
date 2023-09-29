@@ -37,7 +37,7 @@ extension Generator {
         }
         
         associatedValuesString += associatedValues.reduce("", {$0 + "_ " + $1.label.nonColliding + ": " + $1.type.nonColliding + ", "}).dropLast(2)
-        associatedValuesDescriptor += associatedValues.reduce("", {$0 + "let " + $1.label + ", "}).dropLast(2)
+        associatedValuesDescriptor += associatedValues.reduce("", {$0 + "let " + $1.label.nonColliding + ", "}).dropLast(2)
         
         if associatedValues.count > 0 {
             string += "(" + associatedValuesString + ")"
