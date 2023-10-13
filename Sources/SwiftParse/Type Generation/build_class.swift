@@ -143,7 +143,7 @@ extension Generator {
             
         } else if let deciding = variables.first {
             
-            return "(\(deciding.name) == nil ? \"\" : " + element.classItems.map {$0.inDescriptor(true)}.reduce("", {$0 + " + " + $1.nonColliding}).dropFirst(3) + ")"
+            return "(\(deciding.name) == nil ? \"\" : " + element.classItems.map {$0.inDescriptor(true)}.reduce("", {$0 + " + " + $1}).dropFirst(3) + ")"
             
         }
         
