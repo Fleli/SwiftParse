@@ -44,7 +44,7 @@ extension Generator {
             
             let initLines = allFields
                 .map { (name: $0.name.nonColliding, isNil: !chosenFields.contains($0)) }
-                .map { "\t\tself.\($0.name.nonColliding) = \($0.isNil ? "nil" : $0.name.nonColliding)\n" }
+                .map { "\t\tself.\($0.name) = \($0.isNil ? "nil" : $0.name)\n" }
                 .reduce("") { $0 + $1 }
             
             return "\t\n\tinit(\(signatureArgumentList)) {\n\(initLines)\t}\n"
@@ -143,7 +143,7 @@ extension Generator {
             
         } else if let deciding = variables.first {
             
-            return "(\(deciding.name) == nil ? \"\" : " + element.classItems.map {$0.inDescriptor(true)}.reduce("", {$0 + " + " + $1}).dropFirst(3) + ")"
+            return "(\(deciding.name) == nil ? \"\" : " + element.classItems.map {$0.inDescriptor(true)}.reduce("", {$0 + " + " + $1.nonColliding}).dropFirst(3) + ")"
             
         }
         
