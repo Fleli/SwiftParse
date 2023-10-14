@@ -19,7 +19,7 @@ extension Generator {
         init(_ required: Bool, _ name: String, _ type: String) {
             self.required = required
             self.name = name
-            self.type = type.changeToSwiftIdentifier(use: "String")
+            self.type = type.changeToSwiftIdentifier(use: "String", useBackupDirectly: true)
         }
         
         static func == (lhs: ClassField, rhs: ClassField) -> Bool {
@@ -95,7 +95,7 @@ extension Generator {
                 switch item {
                 case .classField(let name, let type):
                     
-                    let fieldType = type.swiftSLRToken.changeToSwiftIdentifier(use: "String")
+                    let fieldType = type.swiftSLRToken.changeToSwiftIdentifier(use: "String", useBackupDirectly: true)
                     let field = ClassField(required, name, fieldType)
                     fields.append(field)
                     

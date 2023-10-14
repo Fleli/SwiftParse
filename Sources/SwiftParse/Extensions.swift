@@ -164,7 +164,8 @@ extension String {
         
     }
     
-    func changeToSwiftIdentifier(use backup: String) -> String {
+    /// Format a `String` so that it can be used as a Swift identifier. If `useBackupDirectly` is `true`, the function immediately returns `backup` upon illegal symbols. Otherwise, it simply inserts `backup` wherever illegal characters appear, if the illegal character is not in the list of frequently used illegal symbols.
+    func changeToSwiftIdentifier(use backup: String, useBackupDirectly: Bool = false) -> String {
         
         var swiftIdentifier = ""
         
