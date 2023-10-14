@@ -166,13 +166,27 @@ extension String {
     
     func changeToSwiftIdentifier(use backup: String) -> String {
         
+        var swiftIdentifier = ""
+        
         for c in self {
+            
             if !"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".contains(c) {
-                return backup
+                
+                if let oftenUsed = String.invalidCharacters[c] {
+                    swiftIdentifier += oftenUsed
+                } else {
+                    swiftIdentifier += backup
+                }
+                
+            } else {
+                
+                swiftIdentifier.append(c)
+                
             }
+            
         }
         
-        return self
+        return swiftIdentifier
         
     }
     
