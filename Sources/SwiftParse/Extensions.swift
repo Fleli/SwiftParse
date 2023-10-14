@@ -173,7 +173,9 @@ extension String {
             
             if !"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".contains(c) {
                 
-                if let oftenUsed = String.invalidCharacters[c] {
+                if useBackupDirectly {
+                    return backup
+                } else if let oftenUsed = String.invalidCharacters[c] {
                     swiftIdentifier += oftenUsed
                 } else {
                     swiftIdentifier += backup
