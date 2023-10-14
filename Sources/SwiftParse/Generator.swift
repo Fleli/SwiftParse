@@ -125,6 +125,9 @@ class Generator {
     }
     
     private func generateListConverter(_ elementName: String, _ nodeName: String, _ separator: String) -> String {
+        
+        let elementName = (elementName == "String") ? "Terminal" : elementName
+        
         return """
             \(desiredVisibility) extension SLRNode {
                 

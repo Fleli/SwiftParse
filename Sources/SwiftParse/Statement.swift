@@ -73,7 +73,7 @@ enum RhsItem: CustomStringConvertible, Hashable {
     
     var arrayTypeName: String {
         switch self {
-        case .terminal(let type):
+        case .terminal(_):
             return "String"
         case .nonTerminal(let name):
             return name
