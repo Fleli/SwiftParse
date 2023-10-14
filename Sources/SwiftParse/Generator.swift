@@ -81,7 +81,7 @@ class Generator {
         }
         
         for list in lists {
-            let repeating = list.repeatingItem.swiftSLRNodeName.nonColliding
+            let repeating = list.repeatingItem.arrayTypeName.nonColliding
             let nodeName = list.nonTerminal.nonColliding
             let separator = (list.separator?.swiftSLRToken ?? "") + " "
             converters += generateListConverter(repeating, nodeName, separator)

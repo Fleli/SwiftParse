@@ -71,6 +71,15 @@ enum RhsItem: CustomStringConvertible, Hashable {
         }
     }
     
+    var arrayTypeName: String {
+        switch self {
+        case .terminal(let type):
+            return "String"
+        case .nonTerminal(let name):
+            return name
+        }
+    }
+    
     init?(from token: Token) {
         
         if token.type == "terminal" {
